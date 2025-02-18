@@ -149,28 +149,20 @@ export interface CarouselConfig<T = Record<string, unknown>> {
   slidesToShow?: number;
 
   /**
-   * Flag to enable dynamic sizing of the carousel.
+   * Whether to dynamically adjust the number of slides to show based on screen size.
    */
-  dynamicSizing?: boolean;
+  useDefaultResizeStrategy?: boolean;
 
   /**
    * CSS selector for the initial focusable slide.
    */
   focusSelector?: string;
-
-  /**
-   * Function to dynamically update carousel settings on resize.
-   */
-  resizeStrategy?: (refs: {
-    slidesToShow: Ref<number>;
-    slidesToScroll: Ref<number>;
-  }) => void;
 }
 
 /**
  * Payload for carousel arrow click events.
  */
-export interface CarouselArrowClickPayload {
+export interface CarouselArrowClickPayload<T = Record<string, unknown>> {
   /**
    * The direction of the arrow that was clicked.
    */
@@ -184,7 +176,25 @@ export interface CarouselArrowClickPayload {
   /**
    * The model data associated with the carousel.
    */
-  model?: Record<string, unknown>;
+  model?: T;
+}
+
+/**
+ * Payload for carousel resize events.
+ */
+export interface CarouselResizePayload<T = Record<string, unknown>> {
+  /**
+   * The number of slides to show at a time in the carousel.
+   */
+  slidesToShow: Ref<number>;
+  /**
+   * The number of slides to scroll on each arrow click.
+   */
+  slidesToScroll: Ref<number>;
+  /**
+   * The model data associated with the carousel.
+   */
+  model?: T;
 }
 
 /**

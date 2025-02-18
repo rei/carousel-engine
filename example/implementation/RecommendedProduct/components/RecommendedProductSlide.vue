@@ -50,8 +50,7 @@ const props = defineProps<RecommendedProductSlide>();
 
 const formattedTitle = computed(() => props.name?.replace('&quot;', '"'));
 const imageSrc = computed(
-  () =>
-    `${process.env.NODE_ENV === 'production' ? 'https://rei.com' : 'https://future.rei-cloud.com'}/media/product/${props.id}?size=300`,
+  () => `https://rei.com/media/product/${props.id}?size=300`,
 );
 
 const emitEvent = inject(CarouselEventKey) as CarouselEventEmitter;

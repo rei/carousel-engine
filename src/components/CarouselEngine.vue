@@ -25,6 +25,7 @@ import { useResizeObserver, useDebounceFn } from '@vueuse/core';
 import type {
   Slide,
   CarouselArrowClickPayload,
+  CarouselResizePayload,
   CarouselEventEmitter,
   CarouselConfig,
   CarouselEngine,
@@ -37,9 +38,9 @@ defineOptions({ name: 'CarouselEngine' });
  * Emits an event with a specified name and optional payload.
  */
 const emit = defineEmits<{
-  (e: string, payload?: unknown): void;
   (e: 'arrowClick', payload: CarouselArrowClickPayload): void;
-  (e: 'resize', payload: { model: unknown }): void;
+  (e: 'resize', payload: CarouselResizePayload): void;
+  (e: string, payload?: unknown): void;
 }>();
 
 /**
@@ -112,12 +113,12 @@ const description = computed(() => carouselConfig.value.description);
 const slidesGap = computed(() => carouselConfig?.value?.slidesGap || 0);
 
 /**
- * Determines whether to dynamically adjust the number of slides based on screen size.
+ * Determines if the carousel should use the default resize strategy.
  */
-const dynamicSizing = ref<boolean>(
-  typeof carouselConfig?.value?.dynamicSizing === 'boolean'
-    ? carouselConfig.value.dynamicSizing
-    : true,
+const useDefaultResizeStrategy = ref<boolean>(
+  typeof carouselConfig?.value?.useDefaultResizeStrategy === 'boolean'
+    ? carouselConfig.value.useDefaultResizeStrategy
+    : false,
 );
 
 /**
@@ -138,7 +139,12 @@ const dataAttributes = computed(
  * Handles arrow click events.
  */
 function onArrowClick({ event, direction }: CarouselArrowClickPayload) {
-  emit('arrowClick', { direction, event, model: props.model });
+  const arrowClickPayload: CarouselArrowClickPayload = {
+    event,
+    direction,
+    model: props.model as Record<string, unknown>,
+  };
+  emit('arrowClick', arrowClickPayload);
 }
 
 /**
@@ -146,7 +152,6 @@ function onArrowClick({ event, direction }: CarouselArrowClickPayload) {
  * Used only when no `resizeStrategy` is provided in `carouselConfig`.
  */
 function defaultResizeStrategy() {
-  if (!dynamicSizing.value) return;
   const screenWidth = window.innerWidth;
   slidesToShow.value = screenWidth >= 1024 ? 5 : screenWidth >= 768 ? 4 : 2;
   slidesToScroll.value = Math.max(slidesToShow.value - 1, 1);
@@ -156,19 +161,16 @@ function defaultResizeStrategy() {
  * Handles window resize events.
  */
 const onResize = useDebounceFn(() => {
-  emit('resize', { model: props.model });
-  if (!dynamicSizing.value) return;
-  if (carouselConfig?.value?.resizeStrategy) {
-    // Use adapter-defined resize strategy
-    carouselConfig.value.resizeStrategy({
-      slidesToShow,
-      slidesToScroll,
-    });
-  } else {
-    // Default fallback behavior
+  const resizePayload: CarouselResizePayload = {
+    model: props.model as Record<string, unknown>,
+    slidesToShow,
+    slidesToScroll,
+  };
+  emit('resize', resizePayload);
+  if (useDefaultResizeStrategy.value) {
     defaultResizeStrategy();
   }
-}, 0);
+}, 25);
 
 /**
  * Sets up the resize observer for the carousel container.
@@ -182,13 +184,4 @@ watch(
   },
   { immediate: true },
 );
-
-/**
- * Updates the number of slides to show when the dynamicSizing prop changes.
- */
-watch(slidesToShow, (newVal) => {
-  if (!dynamicSizing.value) {
-    slidesToShow.value = newVal;
-  }
-});
 </script>

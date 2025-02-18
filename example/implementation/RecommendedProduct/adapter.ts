@@ -11,7 +11,7 @@ import type { RecommendedProductModel, RecommendedProductSlide } from '.';
  *
  * This function takes `modelData`, extracts relevant product information,
  * and transforms it into a structured carousel model that conforms to the
- * `CarouselModel<ProductSlide>` format.
+ * `CarouselConfig<ProductSlide>` format.
  *
  * @param {Record<string, unknown>} modelData - The raw data used to populate the carousel.
  * @returns {CarouselConfig<RecommendedProductSlide>} The resolved product carousel model.
@@ -44,11 +44,11 @@ export const adapter: CarouselAdapter<RecommendedProductSlide> = (
     : [];
 
   /**
-   * Constructs the carousel model with the resolved slides and metadata.
+   * Constructs the carousel config with the resolved slides and metadata.
    *
    * @type {CarouselConfig<RecommendedProductSlide>}
    */
-  const carouselModel: CarouselConfig<RecommendedProductSlide> = {
+  const carouselConfig: CarouselConfig<RecommendedProductSlide> = {
     component: SlideComponent,
     slides,
     carouselId,
@@ -56,9 +56,10 @@ export const adapter: CarouselAdapter<RecommendedProductSlide> = (
     dataAttributes: {
       'data-placement-name': placementName,
     },
+    useDefaultResizeStrategy: true,
   };
 
-  return carouselModel;
+  return carouselConfig;
 };
 
 export default adapter;

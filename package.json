@@ -24,8 +24,7 @@
     "lint:fix": "eslint . --fix",
     "lint-staged": "lint-staged",
     "prepare": "husky",
-    "preview": "vite preview",
-    "type-check": "npx vue-tsc --noEmit"
+    "preview": "vite preview"
   },
   "lint-staged": {
     "package.json": "npx sort-package-json@latest",

@@ -182,7 +182,8 @@ const scrollToIndex = (newIndex: number) => {
  * @param direction - Direction of the arrow ("left" or "right")
  */
 const onArrowClick = (event: Event, direction: 'left' | 'right') => {
-  emit('arrowClick', { event, direction });
+  const arrowClickPayload: CarouselArrowClickPayload = { event, direction };
+  emit('arrowClick', arrowClickPayload);
   const delta =
     direction === 'left' ? -props.slidesToScroll : props.slidesToScroll;
   const proposedIndex = currentIndex.value + delta;

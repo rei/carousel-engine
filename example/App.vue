@@ -25,6 +25,7 @@
         :adapter="LifestyleAdapter"
         @slide-click="lifestyleOnSlideClick"
         @arrow-click="lifestyleOnArrowClick"
+        @resize="onResize"
       />
     </div>
   </CdrContainer>
@@ -50,6 +51,7 @@ import {
 import {
   onSlideClick as lifestyleOnSlideClick,
   onArrowClick as lifestyleOnArrowClick,
+  onResize,
 } from './implementation/Lifestyle/handlers';
 
 // Adapters

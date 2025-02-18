@@ -1,8 +1,4 @@
-import {
-  CdrBreakpointLg,
-  CdrBreakpointMd,
-  CdrSpaceThreeQuarterX,
-} from '@rei/cdr-tokens';
+import { CdrSpaceThreeQuarterX } from '@rei/cdr-tokens';
 import type { LifestyleModel, LifestyleSlideExtended } from '.';
 import type {
   CarouselAdapter,
@@ -47,43 +43,17 @@ export const adapter: CarouselAdapter<LifestyleSlideExtended> = (modelData) => {
    *
    * @type {CarouselConfig<LifestyleSlideExtended>}
    */
-  const carouselModel: CarouselConfig<LifestyleSlideExtended> = {
+  const carouselConfig: CarouselConfig<LifestyleSlideExtended> = {
     component: SlideComponent,
     slides,
     carouselId,
     description: 'Lifestyle carousel',
     slidesGap: parseInt(CdrSpaceThreeQuarterX, 10),
     slidesToShow: slidesVisible,
-    // dynamicSizing: false,
     focusSelector: ':first-child a',
-
-    /**
-     * A function that dynamically adjusts the number of slides to show
-     * and scroll based on the client's screen width.
-     *
-     * @param {{ slidesToShow: Ref<number>, slidesToScroll: Ref<number> }} refs -
-     *  An object containing references to the slidesToShow and slidesToScroll values.
-     * @return {void}
-     */
-    resizeStrategy: ({ slidesToShow, slidesToScroll }) => {
-      const { clientWidth } = window.document.body;
-      switch (true) {
-        case clientWidth >= Number(CdrBreakpointLg):
-          slidesToShow.value = slidesVisible;
-          slidesToScroll.value = slidesVisible - 1;
-          break;
-        case clientWidth >= Number(CdrBreakpointMd):
-          slidesToShow.value = 3;
-          slidesToScroll.value = 2;
-          break;
-        default:
-          slidesToShow.value = 2;
-          slidesToScroll.value = 1;
-      }
-    },
   };
 
-  return carouselModel;
+  return carouselConfig;
 };
 
 export default adapter;

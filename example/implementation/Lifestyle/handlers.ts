@@ -1,5 +1,9 @@
-import type { CarouselArrowClickPayload } from '../../../src/index';
+import type {
+  CarouselArrowClickPayload,
+  CarouselResizePayload,
+} from '../../../src/index';
 import type { LifestyleModel, LifestyleSlideClickPayload } from '.';
+import { CdrBreakpointLg, CdrBreakpointMd } from '@rei/cdr-tokens';
 
 /**
  * Handles slide click events in the carousel and logs analytics data.
@@ -39,4 +43,37 @@ export function onArrowClick(payload: unknown): void {
   };
 
   console.log('onArrowClick', { event, direction, analytics });
+}
+
+/**
+ * Handles window resize events and updates the carousel's
+ * internal state for `slidesToShow` and `slidesToScroll` based
+ * on the current window size.
+ *
+ * @param {unknown} payload - The event payload containing
+ *   information about the carousel's config and model.
+ * @return {void}
+ */
+export function onResize(payload: unknown): void {
+  const {
+    slidesToScroll,
+    slidesToShow,
+    model = {},
+  } = payload as CarouselResizePayload;
+  const { slidesVisible = 3 } = model as Partial<LifestyleModel>;
+
+  const { clientWidth } = window.document.body;
+  switch (true) {
+    case clientWidth >= Number(CdrBreakpointLg):
+      slidesToShow.value = slidesVisible;
+      slidesToScroll.value = slidesVisible - 1;
+      break;
+    case clientWidth >= Number(CdrBreakpointMd):
+      slidesToShow.value = 3;
+      slidesToScroll.value = 2;
+      break;
+    default:
+      slidesToShow.value = 2;
+      slidesToScroll.value = 1;
+  }
 }

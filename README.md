@@ -63,11 +63,11 @@ export const adapter: CarouselAdapter<LifestyleSlide> = (modelData) => {
     : [];
 
   /**
-   * Constructs the carousel model with the resolved slides and metadata.
+   * Constructs the carousel config with the resolved slides and metadata.
    *
    * @type {CarouselConfig<LifestyleSlide>}
    */
-  const carouselModel: CarouselConfig<LifestyleSlide> = {
+  const carouselConfig: CarouselConfig<LifestyleSlide> = {
     component: SlideComponent,
     slides,
     carouselId,
@@ -75,21 +75,9 @@ export const adapter: CarouselAdapter<LifestyleSlide> = (modelData) => {
     slidesGap: parseInt(CdrSpaceThreeQuarterX, 10),
     slidesToShow: slidesVisible,
     focusSelector: ':first-child a',
-
-    /**
-     * A function that dynamically adjusts the number of slides to show
-     * and scroll based on the client's screen width.
-     *
-     * @param {{ slidesToShow: Ref<number>, slidesToScroll: Ref<number> }} refs -
-     *  An object containing references to the slidesToShow and slidesToScroll values.
-     * @return {void}
-     */
-    resizeStrategy: ({ slidesToShow, slidesToScroll }) => {
-      slidesToShow.value = window.innerWidth > 1024 ? slidesVisible : 2;
-    },
   };
 
-  return carouselModel;
+  return carouselConfig;
 };
 
 export default adapter;
@@ -120,7 +108,7 @@ const model = lifestyleModelData as LifestyleModel;
 Carousel Engine emits several named events:
 
 - `arrowClick` - Emitted when an arrow is clicked.
-- `resize` - Emitted when the carousel resize observer fires. When you want to adjust the carousel's internal state, like `slidesToShow` and `slidesToScroll`, define a `resizeStrategy` in your adapter, rather than attaching a listener to this event.
+- `resize` - Emitted when the carousel resize observer fires.
 
 ```ts
 // handlers.ts
@@ -166,6 +154,91 @@ Attach the handler:
 import CarouselEngine from '@rei/carousel-engine';
 
 import { onSlideClick, onArrowClick } from './handlers';
+</script>
+```
+
+#### Resizing
+
+There is a default resizing strategy that you can enable for general use. Enable it by setting `useDefaultResizeStrategy` to `true` from your implementation's adapter. It is disabled by default.
+
+```ts
+// adapter.ts
+...
+/**
+ * Constructs the carousel config with the resolved slides and metadata.
+ *
+ * @type {CarouselConfig<LifestyleSlide>}
+ */
+const carouselConfig: CarouselConfig<LifestyleSlide> = {
+  component: SlideComponent,
+  slides,
+  carouselId,
+  description: 'Lifestyle carousel',
+  slidesGap: parseInt(CdrSpaceThreeQuarterX, 10),
+  slidesToShow: slidesVisible,
+  focusSelector: ':first-child a',
+  useDefaultResizeStrategy: true, // <-- here
+};
+
+return carouselConfig;
+...
+```
+
+If you need to customize the resize strategy, you can attach a handler to the `resize` event. The resize event is emitted when the carousel resize observer fires. It provides the `slidesToShow` and `slidesToScroll` references which can be used to update the carousel's internal state.
+
+Define a handler:
+
+```ts
+/**
+ * Handles window resize events and updates the carousel's
+ * internal state for `slidesToShow` and `slidesToScroll` based
+ * on the current window size.
+ *
+ * @param {unknown} payload - The event payload containing
+ *   information about the carousel's config and model.
+ * @return {void}
+ */
+export function onResize(payload: unknown): void {
+  const {
+    slidesToScroll,
+    slidesToShow,
+    model = {},
+  } = payload as CarouselResizePayload;
+  const { slidesVisible = 3 } = model as Partial<LifestyleModel>;
+
+  const { clientWidth } = window.document.body;
+  switch (true) {
+    case clientWidth >= Number(CdrBreakpointLg):
+      slidesToShow.value = slidesVisible;
+      slidesToScroll.value = slidesVisible - 1;
+      break;
+    case clientWidth >= Number(CdrBreakpointMd):
+      slidesToShow.value = 3;
+      slidesToScroll.value = 2;
+      break;
+    default:
+      slidesToShow.value = 2;
+      slidesToScroll.value = 1;
+  }
+}
+```
+
+Attach the handler:
+
+```vue
+<template>
+  <CarouselEngine
+    :model="model"
+    :adapter="adapter"
+    @arrow-click="onArrowClick"
+    @resize="onResize"
+  />
+</template>
+
+<script setup lang="ts">
+import CarouselEngine from '@rei/carousel-engine';
+
+import { onSlideClick, onArrowClick, onResize } from './handlers';
 </script>
 ```
 
@@ -231,6 +304,7 @@ Attach the handler:
     :adapter="LifestyleAdapter"
     @slide-click="onSlideClick"
     @arrow-click="onArrowClick"
+    @resize="onResize"
   />
 </template>
 
@@ -238,7 +312,7 @@ Attach the handler:
 import CarouselEngine from 'carousel-engine';
 import LifestyleAdapter from './adapter';
 import lifestyleModelData from './mock.json';
-import { onSlideClick, onArrowClick } from './handlers';
+import { onSlideClick, onArrowClick, onResize } from './handlers';
 </script>
 ```
 
