@@ -1,6 +1,6 @@
 {
   "name": "@rei/carousel-engine",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "A flexible, API-driven carousel framework designed for modularity and adaptability. CarouselEngine provides an abstraction layer that allows consumers to define their own adapters for transforming data into a carousel-ready format.",
   "type": "module",
   "exports": {
